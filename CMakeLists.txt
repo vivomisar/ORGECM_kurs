@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.11)
+project(RISC-V_emu)
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall -g -O0")
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Wall")
+AUX_SOURCE_DIRECTORY(src SOURCES)
+add_executable(RISC-V_emu ${SOURCES})
