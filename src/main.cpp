@@ -142,8 +142,11 @@ void menu()
 		          << "1. Добавить инструкцию\n"
 		          << "2. Удалить инструкцию\n"
 		          << "3. Очистить список инструкций\n"
-		          << "4. Запустить конвейер\n"
-		          << "5. Вывести список инструкций\n"
+		          << "4. Запустить конвейер (на n тактов)\n"
+		          << "5. Выполнить один такт конвейера\n"
+		          << "6. Вывести состояние регистров\n"
+		          << "7. Вывести состояние памяти\n"
+		          << "8. Вывести список инструкций\n"
 		          << "0. Выйти\n"
 		          << ">> ";
 		std::cin >> choice;
@@ -151,7 +154,7 @@ void menu()
 			break;
 		switch (choice)
 		{
-		case 1:
+		case 1: // add instruction
 			try
 			{
 				instructions.push_back(instructionBuilder());
@@ -161,7 +164,7 @@ void menu()
 				std::cout << err << '\n';
 			}
 			break;
-		case 2:
+		case 2: // delete instruction
 			std::cout << "Какую инструкцию вы хотите удалить?\n";
 			for (int i = 0; i < instructions.size(); ++i)
 			{
@@ -171,18 +174,35 @@ void menu()
 			std::cin >> choice;
 			instructions.erase(instructions.begin() + choice);
 			break;
-		case 3:
+		case 3: // clear instructions
 			instructions.clear();
 			break;
-		case 4:
-			cpu.pipeline(instructions, instructions.size() + 5);
+		case 4: // run pipeline for n ticks
+			std::cout << "Введите количество тактов\n>> ";
+			std::cin >> choice;
+			cpu.pipeline(instructions, choice);
 			break;
-		case 5:
+		case 5: // run pipeline for 1 tick
+			cpu.pipeline(instructions);
+			break;
+		case 6: // print registers
+			cpu.printRegs();
+			break;
+		case 7: // print memory
+		{
+			uint32_t begin, size;
+			std::cout << "Введите адрес памяти >> ";
+			std::cin >> begin;
+			std::cout << "Введите количество байтов >> ";
+			std::cin >> size;
+			cpu.printMem(begin, size);
+			break;
+		}
+		case 8: // print instructions
 			for (int i = 0; i < instructions.size(); ++i)
 			{
-				std::cout << i << ". " << std::hex << instructions[i] << '\n';
+				std::cout << i << ": " << std::hex << instructions[i];
 			}
-			std::cout << std::dec;
 			break;
 		default:
 			std::cout << "Некорректный выбор\n";

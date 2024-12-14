@@ -19,10 +19,12 @@ class CPU
 
   public:
 	CPU();
-	void pipeline(const std::vector<uint32_t> &, uint16_t ticks = 5);
+	void pipeline(const std::vector<uint32_t> &, uint16_t ticks = 1);
 	uint32_t getReg(uint8_t) const;
+	uint8_t getMem(uint32_t) const;
 	void setReg(uint8_t, uint32_t);
-	void setMem(uint32_t);
+	void setMem(uint32_t, uint8_t);
+	void printMem(uint32_t, uint32_t);
 	void printRegs();
 	void setInUse(uint8_t, bool);
 	~CPU();
