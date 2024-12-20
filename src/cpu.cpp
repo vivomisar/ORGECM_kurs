@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
-CPU::CPU() : pc(0)
+CPU::CPU() : pc(0), tick(0)
 {
 	mem = new Mem(32);
 }
@@ -15,14 +15,13 @@ Instruction *CPU::fetch(uint32_t instr)
 	opcode = instr & 0x7F;
 	rd = (instr & 0xF80) >> 7;
 	funct7 = (instr & 0xFE000000) >> 25;
+	funct3 = (instr & 0x7000) >> 12;
 	rs1 = (instr & 0xF8000) >> 15;
 	rs2 = (instr & 0x1F00000) >> 20;
 	switch (opcode)
 	{
 	case 0x33: // R-type
 	{
-
-		funct3 = (instr & 0x7000) >> 12;
 		uint32_t (*func)(uint32_t, uint32_t) = nullptr;
 		switch (funct3 + (funct7 << 12))
 		{
@@ -57,14 +56,14 @@ Instruction *CPU::fetch(uint32_t instr)
 			throw "Invalid operation";
 		}
 
-		return new iR_type(rd, rs1, rs2, func);
+		return new iR_type(this, rd, rs1, rs2, func);
 	}
 	case 0x13: // I-type
 	{
 		// TODO: imm should be sign-extended
 		imm = (instr & 0xFFF00000) >> 20;
 		uint32_t (*func)(uint32_t, uint16_t) = nullptr;
-		switch (funct3 + (funct7 << 12))
+		switch (funct3)
 		{
 		case 0x0:
 			func = [](uint32_t a, uint16_t b) -> uint32_t {
@@ -96,7 +95,7 @@ Instruction *CPU::fetch(uint32_t instr)
 		default:
 			throw "Invalid operation";
 		}
-		return new iI_type(rd, rs1, imm, func);
+		return new iI_type(this, rd, rs1, imm, func);
 	}
 	case 0x23: // S-type
 	{
@@ -117,7 +116,7 @@ Instruction *CPU::fetch(uint32_t instr)
 			throw "Invalid operation";
 		}
 
-		return new iS_type(rs1, rs2, imm, numBytes);
+		return new iS_type(this, rs1, rs2, imm, numBytes);
 	}
 		/*
 	case 0x37: // U-type
@@ -133,20 +132,18 @@ Instruction *CPU::fetch(uint32_t instr)
 void CPU::pipeline(const std::vector<uint32_t> &instr, uint16_t ticks)
 {
 	uint16_t i = 0;
-	static Instruction *toLoad = nullptr;
-	static Instruction *toExec = nullptr;
-	static Instruction *toWR = nullptr;
-	static Instruction *toWM = nullptr;
-	while (i <= ticks)
+	while (i < ticks)
 	{
-		std::cout << i << " tick\n";
+		std::cout << tick << " tick\n";
 		if (toWM)
 		{
-			toWM->writeMem(*this);
+			toWM->writeMem();
 		}
 		if (toWR)
 		{
-			toWR->writeReg(*this);
+			toWR->writeReg();
+			toWR->WAW();
+			toWR->WAR();
 		}
 		if (toExec)
 		{
@@ -154,7 +151,8 @@ void CPU::pipeline(const std::vector<uint32_t> &instr, uint16_t ticks)
 		}
 		if (toLoad)
 		{
-			toLoad->load(*this);
+			toLoad->load();
+			toLoad->RAW();
 		}
 
 		/*Next stage*/
@@ -175,6 +173,7 @@ void CPU::pipeline(const std::vector<uint32_t> &instr, uint16_t ticks)
 			toLoad = fetch(instr[pc++]);
 		}
 		++i;
+		++tick;
 	}
 }
 
@@ -187,10 +186,6 @@ uint32_t CPU::getReg(uint8_t index) const
 	if (index == 0)
 	{
 		return 0;
-	}
-	if (inUse[index])
-	{
-		std::cerr << "DATA HAZARD\n";
 	}
 	return x[index];
 }
@@ -245,9 +240,41 @@ void CPU::setMem(uint32_t addr, uint8_t value)
 	}
 }
 
-void CPU::setInUse(uint8_t reg, bool state)
+void CPU::setInWrite(uint8_t reg, bool state)
 {
-	inUse[reg] = state;
+	inWrite[reg] = state;
+}
+
+void CPU::setInRead(uint8_t reg, bool state)
+{
+	inRead[reg] = state;
+}
+
+bool CPU::getInWrite(uint8_t reg)
+{
+	return inWrite[reg];
+}
+
+bool CPU::getInRead(uint8_t reg)
+{
+	return inRead[reg];
+}
+
+void CPU::reset()
+{
+	toLoad = nullptr;
+	toExec = nullptr;
+	toWR = nullptr;
+	toWM = nullptr;
+	inRead.reset();
+	inWrite.reset();
+	pc = 0;
+	mem->clear();
+	tick = 0;
+	for (int i = 0; i < 32; ++i)
+	{
+		x[i] = 0;
+	}
 }
 
 CPU::~CPU()

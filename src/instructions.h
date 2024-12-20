@@ -5,11 +5,17 @@
 
 class Instruction
 {
+  protected:
+	CPU *cpu = nullptr;
+
   public:
-	virtual void load(CPU &) = 0;
+	virtual void load() = 0;
 	virtual void exec() = 0;
-	virtual void writeReg(CPU &) = 0;
-	virtual void writeMem(CPU &) = 0;
+	virtual void writeReg() = 0;
+	virtual void writeMem() = 0;
+	virtual void RAW() = 0;
+	virtual void WAR() = 0;
+	virtual void WAW() = 0;
 	virtual ~Instruction()
 	{
 	}
@@ -23,11 +29,15 @@ class iR_type : public Instruction
 	uint32_t (*func)(uint32_t, uint32_t);
 
   public:
-	iR_type(uint8_t, uint8_t, uint8_t, uint32_t (*func)(uint32_t, uint32_t));
-	void load(CPU &) override;
+	iR_type(CPU *, uint8_t, uint8_t, uint8_t, uint32_t (*func)(uint32_t, uint32_t));
+	void load() override;
 	void exec() override;
-	void writeReg(CPU &) override;
-	void writeMem(CPU &) override {};
+	void writeReg() override;
+	void writeMem() override;
+	void RAW() override;
+	void WAR() override;
+	void WAW() override;
+	~iR_type();
 };
 
 class iI_type : public Instruction
@@ -39,11 +49,15 @@ class iI_type : public Instruction
 	uint32_t (*func)(uint32_t, uint16_t);
 
   public:
-	iI_type(uint8_t, uint8_t, uint16_t, uint32_t (*func)(uint32_t, uint16_t));
-	void load(CPU &) override;
+	iI_type(CPU *, uint8_t, uint8_t, uint16_t, uint32_t (*func)(uint32_t, uint16_t));
+	void load() override;
 	void exec() override;
-	void writeReg(CPU &) override;
-	void writeMem(CPU &) override {};
+	void writeReg() override;
+	void writeMem() override;
+	void RAW() override;
+	void WAR() override;
+	void WAW() override;
+	~iI_type();
 };
 class iS_type : public Instruction
 {
@@ -53,34 +67,50 @@ class iS_type : public Instruction
 	uint32_t dsti, src, offset;
 
   public:
-	iS_type(uint8_t rs1, uint8_t rs2, uint16_t imm, uint8_t numBytes);
-	void load(CPU &) override;
+	iS_type(CPU *, uint8_t rs1, uint8_t rs2, uint16_t imm, uint8_t numBytes);
+	void load() override;
 	void exec() override;
-	void writeReg(CPU &) override;
-	void writeMem(CPU &) override;
+	void writeReg() override;
+	void writeMem() override;
+	void RAW() override;
+	void WAR() override;
+	void WAW() override;
+	~iS_type();
 };
 class iU_type : public Instruction
 {
   public:
-	void load(CPU &) override;
+	void load() override;
 	void exec() override;
-	void writeReg(CPU &) override;
-	void writeMem(CPU &) override;
+	void writeReg() override;
+	void writeMem() override;
+	void RAW() override;
+	void WAR() override;
+	void WAW() override;
+	~iU_type();
 };
 class iB_type : public Instruction
 {
   public:
-	void load(CPU &) override;
+	void load() override;
 	void exec() override;
-	void writeReg(CPU &) override;
-	void writeMem(CPU &) override;
+	void writeReg() override;
+	void writeMem() override;
+	void RAW() override;
+	void WAR() override;
+	void WAW() override;
+	~iB_type();
 };
 class iJ_type : public Instruction
 {
   public:
-	void load(CPU &) override;
+	void load() override;
 	void exec() override;
-	void writeReg(CPU &) override;
-	void writeMem(CPU &) override;
+	void writeReg() override;
+	void writeMem() override;
+	void RAW() override;
+	void WAR() override;
+	void WAW() override;
+	~iJ_type();
 };
 #endif

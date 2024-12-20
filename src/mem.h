@@ -13,6 +13,7 @@ class Mem
 
 	uint8_t get(uint32_t addr);
 	void set(uint32_t addr, uint8_t data);
+	void clear();
 
 	~Mem();
 };

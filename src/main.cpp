@@ -1,7 +1,45 @@
 #include "cpu.h"
 #include <cstdint>
+#include <fstream>
 #include <iostream>
 #include <vector>
+
+void loadFromFile(std::vector<uint32_t> &instructions)
+{
+	std::ifstream input;
+	std::string fileName;
+	uint32_t instr;
+	std::cout << "Введите имя файла >> ";
+	std::cin >> fileName;
+	input.open(fileName);
+	if (!input.is_open())
+	{
+		throw "Невозможно открыть файл";
+	}
+	while (!input.eof())
+	{
+		input >> std::hex >> instr;
+		instructions.push_back(instr);
+	}
+	instructions.pop_back();
+}
+
+void saveToFile(const std::vector<uint32_t> &instructions)
+{
+	std::ofstream output;
+	std::string fileName;
+	std::cout << "Введите имя файла >> ";
+	std::cin >> fileName;
+	output.open(fileName);
+	if (!output.is_open())
+	{
+		throw "Невозможно открыть файл";
+	}
+	for (auto i : instructions)
+	{
+		output << std::hex << i << '\n';
+	}
+}
 
 uint32_t instructionBuilder()
 {
@@ -147,6 +185,9 @@ void menu()
 		          << "6. Вывести состояние регистров\n"
 		          << "7. Вывести состояние памяти\n"
 		          << "8. Вывести список инструкций\n"
+		          << "9. Очистить состояние процессора\n"
+		          << "10. Загрузить инструкции из файла\n"
+		          << "11. Сохранить инструкции в файле\n"
 		          << "0. Выйти\n"
 		          << ">> ";
 		std::cin >> choice;
@@ -201,7 +242,30 @@ void menu()
 		case 8: // print instructions
 			for (int i = 0; i < instructions.size(); ++i)
 			{
-				std::cout << i << ": " << std::hex << instructions[i];
+				std::cout << i << ": " << std::hex << instructions[i] << '\n';
+			}
+			break;
+		case 9: // reset cpu
+			cpu.reset();
+			break;
+		case 10: // load from file
+			try
+			{
+				loadFromFile(instructions);
+			}
+			catch (const char *err)
+			{
+				std::cerr << err << '\n';
+			}
+			break;
+		case 11: // save to file
+			try
+			{
+				saveToFile(instructions);
+			}
+			catch (const char *err)
+			{
+				std::cerr << err << '\n';
 			}
 			break;
 		default:
