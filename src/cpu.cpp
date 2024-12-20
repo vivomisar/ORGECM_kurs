@@ -210,8 +210,8 @@ void CPU::printRegs()
 	             "├──────────┼────────────┤──────────┼────────────┤\n";
 	for (int i = 0; i < 32; i++)
 	{
-		std::cout << std::left << "│ x" << std::setw(7) << i << " │ " << std::setw(10) << x[i++] << " │ " << std::left
-		          << "x" << std::setw(7) << i << " │ " << std::setw(10) << x[i] << " │\n";
+		std::cout << std::left << "│ x" << std::setw(7) << std::dec << i << " │ " << std::setw(10) << x[i++] << " │ "
+		          << std::left << "x" << std::setw(7) << i << " │ " << std::setw(10) << x[i] << " │\n";
 		if (i == 31)
 			std::cout << "└──────────┴────────────┴──────────┴────────────┘\n";
 
@@ -242,11 +242,19 @@ void CPU::setMem(uint32_t addr, uint8_t value)
 
 void CPU::setInWrite(uint8_t reg, bool state)
 {
+	if (reg == 0)
+	{
+		return;
+	}
 	inWrite[reg] = state;
 }
 
 void CPU::setInRead(uint8_t reg, bool state)
 {
+	if (reg == 0)
+	{
+		return;
+	}
 	inRead[reg] = state;
 }
 

@@ -8,6 +8,7 @@ iR_type::iR_type(CPU *cpu, uint8_t rd, uint8_t rs1, uint8_t rs2, uint32_t (*func
 	this->cpu = cpu;
 	cpu->setInRead(src1i, true);
 	cpu->setInRead(src2i, true);
+	cpu->setInWrite(dsti, true);
 }
 
 void iR_type::load()
@@ -16,7 +17,6 @@ void iR_type::load()
 	src2 = cpu->getReg(src2i);
 	cpu->setInRead(src1i, false);
 	cpu->setInRead(src2i, false);
-	cpu->setInWrite(dsti, true);
 	std::cout << "Loaded x" << (uint16_t)src1i << "; Loaded x" << (uint16_t)src2i << '\n';
 }
 
