@@ -13,7 +13,6 @@ class Instruction
 	virtual void exec() = 0;
 	virtual void writeReg() = 0;
 	virtual void writeMem() = 0;
-	virtual void RAW() = 0;
 	virtual void WAR() = 0;
 	virtual void WAW() = 0;
 	virtual ~Instruction()
@@ -34,7 +33,6 @@ class iR_type : public Instruction
 	void exec() override;
 	void writeReg() override;
 	void writeMem() override;
-	void RAW() override;
 	void WAR() override;
 	void WAW() override;
 	~iR_type();
@@ -54,7 +52,6 @@ class iI_type : public Instruction
 	void exec() override;
 	void writeReg() override;
 	void writeMem() override;
-	void RAW() override;
 	void WAR() override;
 	void WAW() override;
 	~iI_type();
@@ -72,7 +69,6 @@ class iS_type : public Instruction
 	void exec() override;
 	void writeReg() override;
 	void writeMem() override;
-	void RAW() override;
 	void WAR() override;
 	void WAW() override;
 	~iS_type();
@@ -84,19 +80,24 @@ class iU_type : public Instruction
 	void exec() override;
 	void writeReg() override;
 	void writeMem() override;
-	void RAW() override;
 	void WAR() override;
 	void WAW() override;
 	~iU_type();
 };
 class iB_type : public Instruction
 {
+  private:
+	uint32_t src1, src2;
+	uint16_t imm, offset;
+	uint8_t src1i, src2i;
+	bool (*func)(uint32_t, uint32_t);
+
   public:
+	iB_type(CPU *, uint8_t rs1, uint8_t rs2, uint16_t imm, bool (*func)(uint32_t, uint32_t));
 	void load() override;
 	void exec() override;
 	void writeReg() override;
 	void writeMem() override;
-	void RAW() override;
 	void WAR() override;
 	void WAW() override;
 	~iB_type();
@@ -108,7 +109,6 @@ class iJ_type : public Instruction
 	void exec() override;
 	void writeReg() override;
 	void writeMem() override;
-	void RAW() override;
 	void WAR() override;
 	void WAW() override;
 	~iJ_type();

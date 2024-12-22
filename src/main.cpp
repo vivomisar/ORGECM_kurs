@@ -56,7 +56,7 @@ uint32_t instructionBuilder()
 	std::cin >> choice;
 	switch (choice)
 	{
-	case 1: {
+	case 1: { // R-type
 		uint16_t rd, rs1, rs2;
 		ret += 0x00000033;
 		std::cout << "Выберите инструкцию:\n"
@@ -103,7 +103,7 @@ uint32_t instructionBuilder()
 		ret += (rd << 7) | (rs1 << 15) | (rs2 << 20);
 		break;
 	}
-	case 2: {
+	case 2: { // I-type
 		uint16_t imm, rd, rs1;
 		ret += 0x00000013;
 		std::cout << "Выберите инструкцию:\n"
@@ -150,16 +150,93 @@ uint32_t instructionBuilder()
 		ret += (rd << 7) | (rs1 << 15) | ((imm & 0xFFF) << 20);
 		break;
 	}
-	case 3:
+	case 3: { // S-type
+		uint16_t rs1, rs2, imm;
 		ret += 0x00000023;
+		std::cout << "Выберите инструкцию:\n"
+		          << "1. SB\n"
+		          << "2. SH\n"
+		          << "3. SW\n"
+		          << ">> ";
+		std::cin >> choice;
+		switch (choice)
+		{
+		case 1:
+			break;
+		case 2:
+			ret += 0x00001000;
+			break;
+		case 3:
+			ret += 0x00002000;
+			break;
+		default:
+			throw "Invalid instruction";
+		}
+		std::cout << "Введите сдвиг\n>>";
+		std::cin >> imm;
+		std::cout << "Введите первый регистр источник\n>>";
+		std::cin >> rs1;
+		std::cout << "Введите второй регистр источник\n>>";
+		std::cin >> rs2;
+		if (rs2 > 32 || rs1 > 32)
+		{
+			throw "There is only 32 registers";
+		}
+		ret += (rs2 << 20) | (rs1 << 15) | ((imm & 0x1F) << 7) | ((imm & 0x1E) << 8) | ((imm & 0xFE0) << 25);
 		break;
-	case 4:
+	}
+	case 4: // U-type
 		ret += 0x00000037;
 		break;
-	case 5:
+	case 5: { // B-type
+		uint16_t rs1, rs2, imm;
 		ret += 0x00000063;
+		std::cout << "Выберите инструкцию:\n"
+		          << "1. BEQ\n"
+		          << "2. BNE\n"
+		          << "3. BLT\n"
+		          << "4. BLTU\n"
+		          << "5. BGE\n"
+		          << "6. BGEU\n"
+		          << ">> ";
+		std::cin >> choice;
+		switch (choice)
+		{
+		case 1:
+			break;
+		case 2:
+			ret += 0x00001000;
+			break;
+		case 3:
+			ret += 0x00004000;
+			break;
+		case 4:
+			ret += 0x00006000;
+			break;
+		case 5:
+			ret += 0x00005000;
+			break;
+		case 6:
+			ret += 0x00007000;
+			break;
+		default:
+			throw "Invalid instruction";
+		}
+		std::cout << "Введите сдвиг\n>>";
+		std::cin >> imm;
+		std::cout << "Введите первый регистр источник\n>>";
+		std::cin >> rs1;
+		std::cout << "Введите второй регистр источник\n>>";
+		std::cin >> rs2;
+		if (rs2 > 32 || rs1 > 32)
+		{
+			throw "There is only 32 registers";
+		}
+		ret += (rs2 << 20) | (rs1 << 15) | ((imm & 0x800) << 7) | ((imm & 0x1E) << 8) | ((imm & 0x7E0) << 25) |
+		       ((imm & 0x1000) << 31);
 		break;
-	case 6:
+	}
+	case 6: // J-type
 		ret += 0x0000006F;
 		break;
 	default:

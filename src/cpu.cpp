@@ -118,13 +118,38 @@ Instruction *CPU::fetch(uint32_t instr)
 
 		return new iS_type(this, rs1, rs2, imm, numBytes);
 	}
-		/*
-	case 0x37: // U-type
-		return new iU_type();
 	case 0x63: // B-type (SB-type)
-		return new iB_type();
-	case 0x6F: // J-type (UJ-type)
-		return new iJ_type(); */
+	{
+		imm = ((rd & 0x1) << 11) + ((rd & 0x1E) << 1) + ((funct7 & 0x80) << 12) + ((funct7 & 0x3F) << 5);
+		bool (*func)(uint32_t, uint32_t) = nullptr;
+		switch (funct3)
+		{
+		case 0x0:
+			func = [](uint32_t a, uint32_t b) -> bool { return a == b; };
+			break;
+		case 0x1:
+			func = [](uint32_t a, uint32_t b) -> bool { return a != b; };
+			break;
+		case 0x4:
+			func = [](uint32_t a, uint32_t b) -> bool { return (int32_t)a < (int32_t)b; };
+			break;
+		case 0x6:
+			func = [](uint32_t a, uint32_t b) -> bool { return a < b; };
+			break;
+		case 0x5:
+			func = [](uint32_t a, uint32_t b) -> bool { return (int32_t)a <= (int32_t)b; };
+			break;
+		case 0x7:
+			func = [](uint32_t a, uint32_t b) -> bool { return a <= b; };
+			break;
+		}
+		return new iB_type(this, rs1, rs2, imm, func);
+	}
+		/*
+		case 0x37: // U-type
+		    return new iU_type();
+		case 0x6F: // J-type (UJ-type)
+		    return new iJ_type(); */
 	}
 	return nullptr;
 }
@@ -142,7 +167,6 @@ void CPU::pipeline(const std::vector<uint32_t> &instr, uint16_t ticks)
 		if (toWR)
 		{
 			toWR->writeReg();
-			toWR->WAW();
 			toWR->WAR();
 		}
 		if (toExec)
@@ -152,7 +176,6 @@ void CPU::pipeline(const std::vector<uint32_t> &instr, uint16_t ticks)
 		if (toLoad)
 		{
 			toLoad->load();
-			toLoad->RAW();
 		}
 
 		/*Next stage*/
@@ -164,7 +187,7 @@ void CPU::pipeline(const std::vector<uint32_t> &instr, uint16_t ticks)
 		toWR = toExec;
 		toExec = toLoad;
 		/*Fetch*/
-		if (pc == instr.size())
+		if (pc == instr.size() || getInWrite(32))
 		{
 			toLoad = nullptr;
 		}
@@ -266,6 +289,11 @@ bool CPU::getInWrite(uint8_t reg)
 bool CPU::getInRead(uint8_t reg)
 {
 	return inRead[reg];
+}
+
+void CPU::offsetPC(uint32_t offset)
+{
+	pc += offset / 4;
 }
 
 void CPU::reset()

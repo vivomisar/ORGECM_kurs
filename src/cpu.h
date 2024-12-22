@@ -14,8 +14,8 @@ class CPU
 	uint32_t x[32] = {};
 	uint32_t pc;
 	uint16_t tick;
-	std::bitset<32> inRead;
-	std::bitset<32> inWrite;
+	std::bitset<33> inRead;
+	std::bitset<33> inWrite;
 	Mem *mem;
 	Instruction *toLoad = nullptr;
 	Instruction *toExec = nullptr;
@@ -30,6 +30,7 @@ class CPU
 	uint32_t getReg(uint8_t) const;
 	uint8_t getMem(uint32_t) const;
 	void setReg(uint8_t, uint32_t);
+	void offsetPC(uint32_t);
 	void setMem(uint32_t, uint8_t);
 	void printMem(uint32_t, uint32_t);
 	void printRegs();
