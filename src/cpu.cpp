@@ -142,13 +142,18 @@ Instruction *CPU::fetch(uint32_t instr)
 		case 0x7:
 			func = [](uint32_t a, uint32_t b) -> bool { return a <= b; };
 			break;
+		default:
+			throw "Invalid operation";
 		}
 		return new iB_type(this, rs1, rs2, imm, func);
 	}
-		/*
-		case 0x37: // U-type
-		    return new iU_type();
-		case 0x6F: // J-type (UJ-type)
+
+	case 0x37: // U-type (LUI)
+	{
+		imm = (instr & 0xFFFFF000) << 12;
+		return new iU_type(this, rd, imm);
+	}
+		/*case 0x6F: // J-type (UJ-type)
 		    return new iJ_type(); */
 	}
 	return nullptr;

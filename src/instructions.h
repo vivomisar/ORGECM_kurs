@@ -75,7 +75,11 @@ class iS_type : public Instruction
 };
 class iU_type : public Instruction
 {
+	uint8_t dsti;
+	uint32_t imm;
+
   public:
+	iU_type(CPU *, uint8_t rd, uint32_t imm);
 	void load() override;
 	void exec() override;
 	void writeReg() override;

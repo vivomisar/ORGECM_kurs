@@ -49,7 +49,7 @@ uint32_t instructionBuilder()
 	          << "1. R-type\n"
 	          << "2. I-type\n"
 	          << "3. S-type\n"
-	          << "4. U-type\n"
+	          << "4. U-type (LUI)\n"
 	          << "5. B-type\n"
 	          << "6. J-type\n"
 	          << ">> ";
@@ -185,9 +185,21 @@ uint32_t instructionBuilder()
 		ret += (rs2 << 20) | (rs1 << 15) | ((imm & 0x1F) << 7) | ((imm & 0x1E) << 8) | ((imm & 0xFE0) << 25);
 		break;
 	}
-	case 4: // U-type
+	case 4: { // U-type
+		uint32_t imm;
+		uint16_t rd;
 		ret += 0x00000037;
+		std::cout << "Введите регистр назначения\n>>";
+		std::cin >> rd;
+		std::cout << "Введите значение\n>>";
+		std::cin >> imm;
+		if (rd > 32)
+		{
+			throw "There is only 32 registers";
+		}
+		ret += (rd << 7) | ((imm & 0xFFFFF000) << 12);
 		break;
+	}
 	case 5: { // B-type
 		uint16_t rs1, rs2, imm;
 		ret += 0x00000063;
@@ -236,9 +248,10 @@ uint32_t instructionBuilder()
 		       ((imm & 0x1000) << 31);
 		break;
 	}
-	case 6: // J-type
+	case 6: { // J-type
 		ret += 0x0000006F;
 		break;
+	}
 	default:
 		throw "Unknown type of instruction";
 	}

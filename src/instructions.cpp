@@ -219,3 +219,26 @@ void iB_type::WAW()
 iB_type::~iB_type()
 {
 }
+
+iU_type::iU_type(CPU *cpu, uint8_t dsti, uint32_t imm) : dsti(dsti), imm(imm)
+{
+	this->cpu = cpu;
+	cpu->setInWrite(dsti, true);
+}
+
+void iU_type::load()
+{
+}
+
+void iU_type::exec()
+{
+}
+
+void iU_type::writeMem()
+{
+}
+void iU_type::writeReg()
+{
+	cpu->setReg(dsti, imm);
+	cpu->setInWrite(dsti, false);
+}
