@@ -31,6 +31,7 @@ class CPU
 	uint8_t getMem(uint32_t) const;
 	void setReg(uint8_t, uint32_t);
 	void offsetPC(uint32_t);
+	uint32_t getPC();
 	void setMem(uint32_t, uint8_t);
 	void printMem(uint32_t, uint32_t);
 	void printRegs();

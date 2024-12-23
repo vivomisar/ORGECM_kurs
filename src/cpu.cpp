@@ -153,8 +153,11 @@ Instruction *CPU::fetch(uint32_t instr)
 		imm = (instr & 0xFFFFF000) << 12;
 		return new iU_type(this, rd, imm);
 	}
-		/*case 0x6F: // J-type (UJ-type)
-		    return new iJ_type(); */
+	case 0x6F: { // J-type (UJ-type)
+		imm =
+		    (instr & 0xFF000) + ((instr & 0x100000) >> 9) + ((instr & 0x7FE00000) >> 20) + ((instr & 0x80000000) >> 11);
+		return new iJ_type(this, rd, imm);
+	}
 	}
 	return nullptr;
 }
@@ -198,7 +201,7 @@ void CPU::pipeline(const std::vector<uint32_t> &instr, uint16_t ticks)
 		}
 		else
 		{
-			toLoad = fetch(instr[pc++]);
+			toLoad = fetch(instr[++pc]);
 		}
 		++i;
 		++tick;
@@ -299,6 +302,11 @@ bool CPU::getInRead(uint8_t reg)
 void CPU::offsetPC(uint32_t offset)
 {
 	pc += offset / 4;
+}
+
+uint32_t CPU::getPC()
+{
+	return pc * 4;
 }
 
 void CPU::reset()

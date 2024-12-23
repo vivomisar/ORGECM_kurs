@@ -108,7 +108,12 @@ class iB_type : public Instruction
 };
 class iJ_type : public Instruction
 {
+  private:
+	uint8_t dsti;
+	uint32_t imm;
+
   public:
+	iJ_type(CPU *, uint8_t rd, uint32_t imm);
 	void load() override;
 	void exec() override;
 	void writeReg() override;

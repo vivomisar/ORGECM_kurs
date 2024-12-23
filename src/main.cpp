@@ -249,7 +249,18 @@ uint32_t instructionBuilder()
 		break;
 	}
 	case 6: { // J-type
+		uint32_t imm;
+		uint16_t rd;
 		ret += 0x0000006F;
+		std::cout << "Введите регистр назначения\n>>";
+		std::cin >> rd;
+		std::cout << "Введите значение\n>>";
+		std::cin >> imm;
+		if (rd > 32)
+		{
+			throw "There is only 32 registers";
+		}
+		ret += (rd << 7) | (imm & 0xFF000) | ((imm & 0x800) << 9) | ((imm & 0x7FE) << 20) | ((imm & 0x100000) << 11);
 		break;
 	}
 	default:

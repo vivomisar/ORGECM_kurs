@@ -159,7 +159,7 @@ iS_type::~iS_type()
 }
 
 iB_type::iB_type(CPU *cpu, uint8_t rs1, uint8_t rs2, uint16_t imm, bool (*func)(uint32_t, uint32_t))
-    : src1i(rs1), src2i(rs2), imm(), func(func)
+    : src1i(rs1), src2i(rs2), imm(imm), func(func)
 {
 	this->cpu = cpu;
 	cpu->setInRead(src1i, true);
@@ -241,4 +241,57 @@ void iU_type::writeReg()
 {
 	cpu->setReg(dsti, imm);
 	cpu->setInWrite(dsti, false);
+}
+
+void iU_type::WAR()
+{
+}
+
+void iU_type::WAW()
+{
+}
+
+iU_type::~iU_type()
+{
+}
+
+iJ_type::iJ_type(CPU *cpu, uint8_t rd, uint32_t imm) : dsti(rd), imm(imm)
+{
+	this->cpu = cpu;
+	cpu->setInWrite(dsti, true);
+	cpu->setInWrite(32, true);
+}
+
+void iJ_type::load()
+{
+}
+
+void iJ_type::exec()
+{
+}
+
+void iJ_type::writeReg()
+{
+	cpu->offsetPC(imm);
+	cpu->setReg(dsti, cpu->getPC() + 4);
+	cpu->setInWrite(dsti, false);
+	cpu->setInWrite(32, false);
+	std::cout << "Write to pc\n";
+	std::cout << "Write to x" << +dsti << '\n';
+}
+
+void iJ_type::writeMem()
+{
+}
+
+void iJ_type::WAR()
+{
+}
+
+void iJ_type::WAW()
+{
+}
+
+iJ_type::~iJ_type()
+{
 }
