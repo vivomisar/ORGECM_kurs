@@ -41,13 +41,14 @@ class iR_type : public Instruction
 class iI_type : public Instruction
 {
   private:
-	uint8_t dsti, src1i;
+	uint8_t dsti, src1i, numBytes;
 	uint16_t imm;
 	uint32_t dst, src1;
 	uint32_t (*func)(uint32_t, uint16_t);
+	bool isLoad;
 
   public:
-	iI_type(CPU *, uint8_t, uint8_t, uint16_t, uint32_t (*func)(uint32_t, uint16_t));
+	iI_type(CPU *, bool, uint8_t, uint8_t, uint8_t, uint16_t, uint32_t (*func)(uint32_t, uint16_t));
 	void load() override;
 	void exec() override;
 	void writeReg() override;

@@ -11,7 +11,7 @@ class Mem
 	Mem() = delete;
 	Mem(uint32_t size);
 
-	uint8_t get(uint32_t addr);
+	uint8_t get(uint32_t addr, bool verbose);
 	void set(uint32_t addr, uint8_t data);
 	void clear();
 

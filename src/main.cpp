@@ -51,7 +51,8 @@ uint32_t instructionBuilder()
 	          << "3. S-type\n"
 	          << "4. U-type (LUI)\n"
 	          << "5. B-type\n"
-	          << "6. J-type\n"
+	          << "6. J-type (JAL)\n"
+	          << "7. I-type (Load)\n"
 	          << ">> ";
 	std::cin >> choice;
 	switch (choice)
@@ -261,6 +262,41 @@ uint32_t instructionBuilder()
 			throw "There is only 32 registers";
 		}
 		ret += (rd << 7) | (imm & 0xFF000) | ((imm & 0x800) << 9) | ((imm & 0x7FE) << 20) | ((imm & 0x100000) << 11);
+		break;
+	}
+	case 7: { // Load
+		uint16_t imm, rd, rs1;
+		ret += 0x00000003;
+		std::cout << "Выберите инструкцию:\n"
+		          << "1. LB\n"
+		          << "2. LH\n"
+		          << "3. LW\n"
+		          << ">> ";
+		std::cin >> choice;
+		switch (choice)
+		{
+		case 1:
+			break;
+		case 2:
+			ret += 0x00001000;
+			break;
+		case 3:
+			ret += 0x00002000;
+			break;
+		default:
+			throw "Invalid instruction";
+		}
+		std::cout << "Введите регистр назначения\n>>";
+		std::cin >> rd;
+		std::cout << "Введите первый регистр источник\n>>";
+		std::cin >> rs1;
+		std::cout << "Введите значение\n>>";
+		std::cin >> imm;
+		if (rd > 32 || rs1 > 32)
+		{
+			throw "There is only 32 registers";
+		}
+		ret += (rd << 7) | (rs1 << 15) | ((imm & 0xFFF) << 20);
 		break;
 	}
 	default:

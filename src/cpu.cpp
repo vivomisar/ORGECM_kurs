@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
-CPU::CPU() : pc(0), tick(0)
+CPU::CPU() : pc(-1), tick(0)
 {
 	mem = new Mem(32);
 }
@@ -95,7 +95,7 @@ Instruction *CPU::fetch(uint32_t instr)
 		default:
 			throw "Invalid operation";
 		}
-		return new iI_type(this, rd, rs1, imm, func);
+		return new iI_type(this, false, 0, rd, rs1, imm, func);
 	}
 	case 0x23: // S-type
 	{
@@ -157,6 +157,27 @@ Instruction *CPU::fetch(uint32_t instr)
 		imm =
 		    (instr & 0xFF000) + ((instr & 0x100000) >> 9) + ((instr & 0x7FE00000) >> 20) + ((instr & 0x80000000) >> 11);
 		return new iJ_type(this, rd, imm);
+	}
+	case 0x3: { // I-type (load)
+		uint8_t numBytes = 0;
+		imm = (instr & 0xFFF00000) >> 20;
+		uint32_t (*func)(uint32_t, uint16_t) = [](uint32_t a, uint16_t b) -> uint32_t { return a + b; };
+		switch (funct3)
+		{
+		case 0x0:
+			numBytes = 1;
+			break;
+		case 0x1:
+			numBytes = 2;
+			break;
+		case 0x2:
+			numBytes = 4;
+			break;
+			break;
+		default:
+			throw "Invalid operation";
+		}
+		return new iI_type(this, true, numBytes, rd, rs1, imm, func);
 	}
 	}
 	return nullptr;
@@ -255,7 +276,7 @@ void CPU::printMem(uint32_t begin, uint32_t size)
 {
 	for (uint32_t i = 0; i < size; i++)
 	{
-		std::cout << std::hex << i + begin << ": " << std::hex << mem->get(i) << "\n";
+		std::cout << std::hex << i + begin << ": " << std::hex << +mem->get(i, false) << "\n";
 	}
 }
 
@@ -271,22 +292,35 @@ void CPU::setMem(uint32_t addr, uint8_t value)
 	}
 }
 
-void CPU::setInWrite(uint8_t reg, bool state)
+uint8_t CPU::getMem(uint32_t addr) const
 {
-	if (reg == 0)
+	try
 	{
-		return;
+		return mem->get(addr, true);
 	}
-	inWrite[reg] = state;
+	catch (const char *err)
+	{
+		std::cout << err << '\n';
+	}
+	return 0;
 }
 
-void CPU::setInRead(uint8_t reg, bool state)
+void CPU::setInWrite(uint8_t reg, int8_t state)
 {
 	if (reg == 0)
 	{
 		return;
 	}
-	inRead[reg] = state;
+	inWrite[reg] += state;
+}
+
+void CPU::setInRead(uint8_t reg, int8_t state)
+{
+	if (reg == 0)
+	{
+		return;
+	}
+	inRead[reg] += state;
 }
 
 bool CPU::getInWrite(uint8_t reg)
@@ -315,9 +349,9 @@ void CPU::reset()
 	toExec = nullptr;
 	toWR = nullptr;
 	toWM = nullptr;
-	inRead.reset();
-	inWrite.reset();
-	pc = 0;
+	inRead.fill(0);
+	inWrite.fill(0);
+	pc = -1;
 	mem->clear();
 	tick = 0;
 	for (int i = 0; i < 32; ++i)

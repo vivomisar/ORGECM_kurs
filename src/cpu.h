@@ -2,7 +2,7 @@
 #define CPU_H
 
 #include "mem.h"
-#include <bitset>
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -14,8 +14,8 @@ class CPU
 	uint32_t x[32] = {};
 	uint32_t pc;
 	uint16_t tick;
-	std::bitset<33> inRead;
-	std::bitset<33> inWrite;
+	std::array<uint8_t, 33> inRead;
+	std::array<uint8_t, 33> inWrite;
 	Mem *mem;
 	Instruction *toLoad = nullptr;
 	Instruction *toExec = nullptr;
@@ -35,8 +35,8 @@ class CPU
 	void setMem(uint32_t, uint8_t);
 	void printMem(uint32_t, uint32_t);
 	void printRegs();
-	void setInRead(uint8_t, bool);
-	void setInWrite(uint8_t, bool);
+	void setInRead(uint8_t, int8_t);
+	void setInWrite(uint8_t, int8_t);
 	bool getInRead(uint8_t);
 	bool getInWrite(uint8_t);
 	~CPU();
